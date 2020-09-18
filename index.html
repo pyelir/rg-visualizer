@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Random Graph Visualizer</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="view"></div>
+  <div class="slidecontainer">
+    <input type="range" min="0" max="1" value="0.5" class="slider" step="0.001" id="pval"/>
+  </div>
+  <script>
+    let slider = document.getElementById("pval");
+    let output = document.getElementById("view");
+    output.appendChild(document.createTextNode(slider.value));
+    slider.addEventListener("input", () => {
+      console.log(slider.value);
+      output.removeChild(output.childNodes[0]);
+      output.appendChild(document.createTextNode(slider.value));
+    });
+  </script>
+</body>
+</html>

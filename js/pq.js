@@ -1,25 +1,37 @@
 
+// export default
+
 class PriorityQueue {
   constructor() {
     /* every element is an Object {key, obj} */
     this.elems = [];
     /* using this as a map obj -> index of Ojbect holding obj in this.elems */
-    this.indices = {};
+    this.indices = new Map();
     /* just length of this.elems but maintaining for convenience */
     this.heapsize = 0;
   }
 
   /* parent, left, and right are helper functions for index calculations */
   parent(idx) {
-    return Math.floor(idx/2);
+    return Math.floor((idx-1)/2);
   }
 
   left(idx) {
-    return 2*idx;
+    return 2*idx+1;
   }
 
   right(idx) {
-    return 2*idx + 1;
+    return 2*idx + 2;
+  }
+
+  swap(idx1, idx2) {
+    let tmp = this.elems[idx1];
+    this.elems[idx1] = this.elems[idx2];
+    this.elems[idx2] = tmp;
+    // Update so we can find indices give an object
+    this.indices.set(this.elems[idx1].obj, idx1);
+    this.indices.set(this.elems[idx2].obj, idx2);
+
   }
 
   /* min-heapify assumes that left and right children of index i are
@@ -30,8 +42,10 @@ class PriorityQueue {
     let l = this.left(i);
     let r = this.right(i);
     let smallest;
-    /* Contorted logic to handle cases where left or right subchildren
-       don't exist */
+    /* Nested conditionals needed to check if a child at left (resp. right)
+       index exists before comparing it to the root of the subtree we're
+       currently inspecting.
+       */
     if (l < this.heapsize) {
       if (this.elems[l].key < this.elems[i].key) {
         smallest = l;
@@ -43,19 +57,13 @@ class PriorityQueue {
       smallest = i;
     }
     if (r < this.heapsize) {
-       if (this.elems[r].key < this.elems[i].key) {
+       if (this.elems[r].key < this.elems[smallest].key) {
          smallest = r;
        }
     }
     if (smallest != i) {
-      let tmp = this.elems[smallest];
-      this.elems[smallest] = this.elems[i];
-      this.elems[i] = tmp;
-
-      /* If we switched anything, keep track of the indices */
-      this.indices[this.elems[i].obj] = i;
-      this.indices[this.elems[smallest].obj] = smallest;
-      min_heapify(smallest);
+      this.swap(i, smallest);
+      this.min_heapify(smallest);
     }
   }
 
@@ -68,24 +76,19 @@ class PriorityQueue {
     this.elems[0] = this.elems[this.heapsize - 1];
     this.heapsize--;
     this.elems = this.elems.slice(0,-1);
+    this.indices.delete(min.obj);
     this.min_heapify(0);
-    return min;
+    return min.obj;
   }
 
   decrease_key(obj, newkey) {
-    let i = this.indices[obj];
+    let i = this.indices.get(obj);
     if (newkey > this.elems[i].key) {
       throw "new key bigger than old key";
     }
     this.elems[i].key = newkey;
-    while ((i > 0) && (this.elems[this.parent(i)].key < this.elems[i].key)) {
-      let tmp = this.elems[this.parent(i)];
-      this.elems[this.parent(i)] = this.elems[i];
-      this.elems[i] = tmp;
-
-      /* If we switched anything, keep track of the indices */
-      this.indices[this.elems[i].obj] = i;
-      this.indices[this.elems[this.parent(i)].obj] = this.parent(i);
+    while ((i > 0) && (this.elems[this.parent(i)].key > this.elems[i].key)) {
+      this.swap(i, this.parent(i));
       i = this.parent(i);
     }
   }
@@ -93,18 +96,34 @@ class PriorityQueue {
   heap_insert(elem,key) {
       this.heapsize++;
       this.elems[this.heapsize - 1] = {'obj': elem, 'key': Infinity};
-      this.indices[elem] = this.heapsize - 1;
+      this.indices.set(elem, this.heapsize - 1);
       this.decrease_key(elem, key);
+  }
+
+  is_empty() {
+    return this.heapsize == 0;
+  }
+
+  contains(elem) {
+    return this.indices.has(elem);
+  }
+
+  getkey(elem) {
+    return this.indices(elem);
   }
 
 }
 
+/* testing code
 let test = new PriorityQueue();
-test.heap_insert("apple", 6);
-test.heap_insert("banana", 4);
-test.heap_insert("orange", 7);
-test.heap_insert("persimmon", 2.0001);
-test.decrease_key("orange", 2);
-console.log(test.extract_min());
-console.log(test.extract_min());
-console.log(test.extract_min());
+let fruits = ['apple', 'orange', 'banana', 'pear', 'persimmon'];
+for (let i = 0; i < 5; i++) {
+  test.heap_insert(fruits[i], i);
+}
+console.log(test.contains("orange"));
+console.log(test.contains("grapefruit"));
+test.decrease_key('persimmon', 0.5)
+while (!test.is_empty()) {
+  console.log(test.extract_min());
+}
+*/

@@ -1,23 +1,29 @@
+import PriorityQueue from "./pq.js";
+
 class Graph {
 	constructor(n) {
 		this.nodes = n /* store only |V| */
-		this.edges = {};
+		this.edges = Map();
 		for (let i = 0; i < n; i++) {
-			this.edges[i] = {};
+			this.edges.set(i, Map());
 		}
 	}
-	
+
 	/* addEdge
 	 * - u,v: two nodes (represented by numbers, 0<=u,v<n
-	 * - w: a weight.  For our purposes, 0 <= w < 1 
+	 * - w: a weight.  For our purposes, 0 <= w < 1
 	 */
 	addEdge(u,v,w) {
-		this.edges[u][v] = w;
-		this.edges[v][u] = w;
+		this.edges.get(u).set(v, w);
+		this.edges.get(v).set(u, w);
+	}
+
+	getEdge(u,v) {
+		return this.edges.get(u).get(v);
 	}
 
 	getNeighbors(v) {
-		return this.edges[v];
+		return this.edges.get(v);
 	}
 
 	static getGnp(n) {
@@ -30,6 +36,41 @@ class Graph {
 		return gnp;
 	}
 
-}
+	/* Compute the minimum spanning tree of some graph G using Prim's algorithm */
+	static getMST(G, startnode) {
+		// Q is our min-heap that keep track of the lowest weight edge adjacent to
+		// what we've built so far.
+		// Pi tracks the parents of nodes we've explored
+		let Q = new PriorityQueue();
+		let Pi = new Map();
+		for (int i = 0; i < G.nodes; i++) {
+			Q.heap_insert(i, Infinity);
+			Pi.set(i, NULL);
+		}
+		Q.decrease_key(startnode, 0);
+		while (!Q.is_empty()) {
+			let u = Q.extract_min();
+			for (let nbr of G.getNeighbors(u)) {
+				let w = G.edges.get(u).get(nbr);
+				if (Q.contains(nbr)) {
+					if (Q.getkey(nbr) > w) {
+						Pi.set(nbr, u);
+						Q.decrease_key(nbr, w);
+					}
+				}
+			}
+		}
+		return Graph.build_MST(G, Pi);
+	}
 
-console.log(Graph.getGnp(5).getNeighbors(3));
+	static build_MST(G, Pi) {
+		let H = new Graph(G.nodes);
+		for (let e of Pi) {
+			if (e[1] != NULL) {
+				H.addEdge(e[0], e[1], G.getEdge(e[0],e[1]));
+			}
+		}
+		return H;
+	}
+
+}

@@ -1,12 +1,16 @@
 import PriorityQueue from "./pq.js";
 
-class Graph {
+export default class Graph {
 	constructor(n) {
 		this.nodes = n /* store only |V| */
-		this.edges = Map();
+		this.edges = new Map();
 		for (let i = 0; i < n; i++) {
-			this.edges.set(i, Map());
+			this.edges.set(i, new Map());
 		}
+	}
+
+  areAdjacent(u,v) {
+		return this.edges.get(u).has(v);
 	}
 
 	/* addEdge
@@ -43,19 +47,20 @@ class Graph {
 		// Pi tracks the parents of nodes we've explored
 		let Q = new PriorityQueue();
 		let Pi = new Map();
-		for (int i = 0; i < G.nodes; i++) {
+		for (let i = 0; i < G.nodes; i++) {
 			Q.heap_insert(i, Infinity);
-			Pi.set(i, NULL);
+			Pi.set(i, null);
 		}
 		Q.decrease_key(startnode, 0);
 		while (!Q.is_empty()) {
 			let u = Q.extract_min();
 			for (let nbr of G.getNeighbors(u)) {
-				let w = G.edges.get(u).get(nbr);
-				if (Q.contains(nbr)) {
-					if (Q.getkey(nbr) > w) {
-						Pi.set(nbr, u);
-						Q.decrease_key(nbr, w);
+				let w = nbr[1];
+				let v = nbr[0];
+				if (Q.contains(v)) {
+					if (Q.getkey(v) > w) {
+						Pi.set(v, u);
+						Q.decrease_key(v, w);
 					}
 				}
 			}
@@ -66,7 +71,7 @@ class Graph {
 	static build_MST(G, Pi) {
 		let H = new Graph(G.nodes);
 		for (let e of Pi) {
-			if (e[1] != NULL) {
+			if (e[1] != null) {
 				H.addEdge(e[0], e[1], G.getEdge(e[0],e[1]));
 			}
 		}
@@ -74,3 +79,7 @@ class Graph {
 	}
 
 }
+
+//let test = Graph.getGnp(10);
+//let m = Graph.getMST(test, 0);
+//console.log(m);

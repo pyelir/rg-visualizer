@@ -1,7 +1,5 @@
 
-// export default
-
-class PriorityQueue {
+export default class PriorityQueue {
   constructor() {
     /* every element is an Object {key, obj} */
     this.elems = [];
@@ -76,8 +74,11 @@ class PriorityQueue {
     this.elems[0] = this.elems[this.heapsize - 1];
     this.heapsize--;
     this.elems = this.elems.slice(0,-1);
-    this.indices.delete(min.obj);
-    this.min_heapify(0);
+    if (this.heapsize > 0) {
+      this.indices.set(this.elems[0].obj, 0);
+      this.indices.delete(min.obj);
+      this.min_heapify(0);
+    }
     return min.obj;
   }
 
@@ -94,9 +95,9 @@ class PriorityQueue {
   }
 
   heap_insert(elem,key) {
+      this.elems[this.heapsize] = {'obj': elem, 'key': Infinity};
+      this.indices.set(elem, this.heapsize);
       this.heapsize++;
-      this.elems[this.heapsize - 1] = {'obj': elem, 'key': Infinity};
-      this.indices.set(elem, this.heapsize - 1);
       this.decrease_key(elem, key);
   }
 
@@ -108,8 +109,8 @@ class PriorityQueue {
     return this.indices.has(elem);
   }
 
-  getkey(elem) {
-    return this.indices(elem);
+  getkey(queryObj) {
+    return this.elems[this.indices.get(queryObj)].key;
   }
 
 }

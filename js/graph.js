@@ -81,16 +81,64 @@ export default class Graph {
 	static getAPSP(G) {
 		let apsp = new Map();
 		for (let v = 0; v < G.nodes; v++) {
-			let BFSDs = getBFSDs(G, v);
+			let BFSDs = Graph.getBFSDs(G, v);
 			apsp.set(v, BFSDs);
 		}
 		return apsp;
 	}
 
-	
+	static getBFSDs(G, s) {
+		let colors = new Map();
+		let pi = new Map();
+		let D = new Map();
+		for (let u = 0; u < G.nodes; u++) {
+			if (u != s) {
+				colors.set(u, "white");
+				D.set(u, Infinity);
+				pi.set(u, null);
+			}
+		}
+		colors.set(s, "gray"); D.set(s, 0); pi.set(s, null);
+		let Q = new Queue();
+		Q.enqueue(s);
+		while (!Q.isEmpty()) {
+			let u = Q.dequeue();
+			for (let v of G.getNeighbors(u).keys()) {
+				if (colors.get(v) == "white") {
+					colors.set(v, "gray");
+					D.set(v, D.get(u) + 1);
+					pi.set(v, u);
+					Q.enqueue(v);
+				}
+			}
+			colors.set(u, "black");
+		}
+		return D;
+	}
 
 }
 
-//let test = Graph.getGnp(10);
-//let m = Graph.getMST(test, 0);
-//console.log(m);
+class Queue {
+	constructor() {
+		this.elems = [];
+	}
+
+	dequeue() {
+		let elem = this.elems[0];
+		this.elems = this.elems.slice(1,);
+		return elem;
+
+	}
+
+	enqueue(elem) {
+		this.elems.push(elem);
+	}
+
+	isEmpty() {
+		return this.elems.length == 0;
+	}
+}
+
+// let test = Graph.getGnp(10);
+// let m = Graph.getMST(test, 0);
+// console.log(Graph.getAPSP(m));

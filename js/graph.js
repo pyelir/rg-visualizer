@@ -78,6 +78,17 @@ export default class Graph {
 		return H;
 	}
 
+	static getAPSP(G) {
+		let apsp = new Map();
+		for (let v = 0; v < G.nodes; v++) {
+			let BFSDs = getBFSDs(G, v);
+			apsp.set(v, BFSDs);
+		}
+		return apsp;
+	}
+
+	
+
 }
 
 //let test = Graph.getGnp(10);

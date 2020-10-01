@@ -80,10 +80,17 @@ export default class Graph {
 
 	static getAPSP(G) {
 		let apsp = new Map();
+		let max = 0;
 		for (let v = 0; v < G.nodes; v++) {
 			let BFSDs = Graph.getBFSDs(G, v);
+			let newmax = [...BFSDs.entries()].reduce((a, e) => a[1] > e[1] ? a : e)[1];
+			if (newmax > max) {
+				max = newmax;
+			}
 			apsp.set(v, BFSDs);
 		}
+		apsp.set('max', max);
+		// need to set max :(
 		return apsp;
 	}
 

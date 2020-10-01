@@ -78,7 +78,17 @@ function getDi(G, pos, Kij, Lij) {
 }
 
 function getLij(G, Dij) {
-  
+  let L = 0.5/Dij.get("max");
+  let Lij = new Map();
+  for (let u = 0; u < G.nodes; u++) {
+    Lij.set(u, new Map());
+    for (let v = 0; v<G.nodes; v++) {
+      if (u != v) {
+        Lij.get(u).set(v, L * Dij.get(u).get(v));
+      }
+    }
+  }
+  return Lij;
 }
 
 function KamadaKawaLayout(G) {
@@ -91,5 +101,4 @@ function KamadaKawaLayout(G) {
   let Delta_i = getDi(G, pos, Kij, Lij);
   // get the node with the highest value Di
   let maxm = [...Delta_i.entries()].reduce((a, e) => e[1] > a[1] ? e : a)[0];
-
 }

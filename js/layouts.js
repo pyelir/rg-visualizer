@@ -67,6 +67,20 @@ function firstPartial(G, pos, Kij, Lij, node, coord) {
   return total;
 }
 
+function getKij(G, Dij) {
+  let Kij = new Map();
+  let K = 1.0;
+  for (let u = 0; u < G.nodes; u++) {
+    let newRow = new Map();
+    for (let v = 0; v < G.nodes; v++) {
+      if (u != v) {
+        newRow.set(v, K / (Dij.get(u).get(v) ** 2));
+      }
+    }
+    Kij.set(u, newrow);
+  }
+}
+
 function getDi(G, pos, Kij, Lij) {
   let Di = new Map();
   for (let v = 0; v < G.nodes; v++) {

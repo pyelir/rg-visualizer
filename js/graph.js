@@ -86,9 +86,6 @@ export default class Graph {
 		}
 		return apsp;
 	}
-
-	
-
 }
 
 //let test = Graph.getGnp(10);

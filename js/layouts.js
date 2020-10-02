@@ -1,7 +1,10 @@
+import Graph from "./graph.js"
+import Vec from "./drawtest.js"
+
 // Get random positions
 function randomLayout(G) {
   let positions = new Map();
-  for (let v = 0; v < H.nodes; v++) {
+  for (let v = 0; v < G.nodes; v++) {
     positions.set(v, new Vec(Math.random(), Math.random()));
   }
   return positions;
@@ -57,16 +60,17 @@ function firstPartial(G, pos, Kij, Lij, node, coord) {
   let total = 0;
   for (let u = 0; u < G.nodes; u++) {
     if (u != node) {
-      let numerator = Lij.get(u).get(node) * (pos.get(node)[coord] - pos.get(u)[coord]);
-      let denominator = (pos.get(v)[0]-pos.get(u)[0]) ** 2 + (pos.get(v)[1]-pos.get(u)[1]) ** 2;
+      let numerator = Lij.get(u).get(node) * (pos.get(node).coord(coord) - pos.get(u).coord(coord));
+      let denominator = (pos.get(node).x-pos.get(u).x) ** 2 + (pos.get(node).y-pos.get(u).y) ** 2;
       denominator = Math.sqrt(denominator);
-      let multiplicand = (pos.get(node)[coord] - pos.get(u)[coord]) - (numerator / denominator);
-      total = total + (Kij.get(u).get(v) * multiplicand);
+      let multiplicand = (pos.get(node).coord(coord) - pos.get(u).coord(coord)) - (numerator / denominator);
+      total = total + (Kij.get(u).get(node) * multiplicand);
     }
   }
   return total;
 }
 
+// gets spring coeffs
 function getKij(G, Dij) {
   let Kij = new Map();
   let K = 1.0;
@@ -77,10 +81,12 @@ function getKij(G, Dij) {
         newRow.set(v, K / (Dij.get(u).get(v) ** 2));
       }
     }
-    Kij.set(u, newrow);
+    Kij.set(u, newRow);
   }
+  return Kij;
 }
 
+// gets largest gradient magnitude
 function getDi(G, pos, Kij, Lij) {
   let Di = new Map();
   for (let v = 0; v < G.nodes; v++) {
@@ -91,8 +97,9 @@ function getDi(G, pos, Kij, Lij) {
   return Di;
 }
 
+// Gets ideal lengths
 function getLij(G, Dij) {
-  let L = 0.5/Dij.get("max");
+  let L = 1/Dij.get("max");
   let Lij = new Map();
   for (let u = 0; u < G.nodes; u++) {
     Lij.set(u, new Map());
@@ -111,8 +118,11 @@ function KamadaKawaLayout(G) {
   let Lij = getLij(G, Dij);
   let Kij = getKij(G, Dij);
   // Initialize with a random layout
-  let layout = randomLayout(G);
+  let pos = randomLayout(G);
   let Delta_i = getDi(G, pos, Kij, Lij);
   // get the node with the highest value Di
   let maxm = [...Delta_i.entries()].reduce((a, e) => e[1] > a[1] ? e : a)[0];
+  return maxm;
 }
+
+let G = Graph.getMST(Graph.getGnp(10), 0);

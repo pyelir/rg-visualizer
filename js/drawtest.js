@@ -142,7 +142,7 @@ class Coords {
 }
 
 // vector in 2D Euclidean space
-class Vec {
+export default class Vec {
   constructor(x, y) {
     this.x = x;
     this.y = y;
@@ -160,6 +160,14 @@ class Vec {
     return new Vec(c * this.x, c * this.y );
   }
 
+  // Bit of a hack :(
+  coord(num) {
+    if (num == 0) {
+      return this.x;
+    }
+    return this.y;
+  }
+
   get magnitude() {
     return Math.sqrt(this.x * this.x + this.y * this.y);
   }
@@ -170,4 +178,4 @@ class Vec {
   }
 }
 
-draw(H, springLayout(H), document.querySelector("canvas"));
+// draw(H, springLayout(H), document.querySelector("canvas"));

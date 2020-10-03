@@ -1,5 +1,6 @@
 import Graph from "./graph.js";
-let G = Graph.getGnp(20);
+import Layout from "./layouts.js"
+let G = Graph.getGnp(80);
 let H = Graph.getMST(G, 0);
 
 
@@ -178,4 +179,4 @@ export default class Vec {
   }
 }
 
-// draw(H, springLayout(H), document.querySelector("canvas"));
+draw(H, Layout.KamadaKawaiLayout(H), document.querySelector("canvas"));

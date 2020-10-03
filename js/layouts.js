@@ -86,6 +86,60 @@ function getKij(G, Dij) {
   return Kij;
 }
 
+// Computes the second partial derivative of the energy function
+// with respect to coord of node
+function getSecondPartial(G, pos, Kij, Lij, node, coord) {
+  // switching coord simplifies calculations
+  let opposite = Math.abs(coord - 1);
+  let total = 0;
+  for (let u = 0; u < G.nodes; u++) {
+    if (u != node) {
+      let numerator = Lij.get(u).get(node) *
+                      ( (pos.get(node).coord(opposite)
+                        - pos.get(u).coord(opposite) )
+                      ** 2);
+      let denominator = (pos.get(node).x - pos.get(u).x) ** 2 + (pos.get(node).y - pos.get(u).y) ** 2;
+      let denominator = Math.pow(denominator, 3/2);
+      total = total + Kij.get(u).get(node) * (numerator/denominator);
+    }
+  }
+  return total;
+}
+
+// Clairut's theorem tells us that d^2E/dXmdYm = d^2E/dYmdXm
+// Upshot: just need this function :)
+function getSecondMixedPartial(G, pos, Kij, Lij, node) {
+  let total = 0;
+  for (let u = 0; u < G.nodes; u++) {
+    if (u != v) {
+      let numerator =    Lij.get(u).get(node)
+                      * (pos.get(node).x - pos.get(u).x)
+                      * (pos.get(node).y - pos.get(u).y);
+      let denominator =   (pos.get(node).x - pos.get(u).x) ** 2
+                        + (pos.get(node).y - pos.get(u).y) ** 2;
+      let denominator = Math.pow(denominator, 3/2);
+      total = total + Kij.get(u).get(v)*(1-(numerator/denominator));
+    }
+  }
+  return total;
+}
+
+// Returns the next step in our iteration to minimize one single
+// node's energy
+function getDelta(G, v, pos, Kij, Lij) {
+  let a = getSecondPartial(G, pos, Kij, Lij, v, 0); // a = d^2E/dX_m^2
+  let b = getSecondMixedPartial(G, pos, Kij, Lij, v);
+  let c = (-1) * firstPartial(G, pos, Kij, Lij, v, 0);
+  let e = getSecondMixedPartial(G, pos, Kij, Lij, v); // yes, e is just b
+  let f = getSecondPartial(G, pos, Kij, Lij, v, 1);
+  let g = (-1) * firstPartial(G, pos, Kij, Lij, v, 1);
+
+  // Solve the linear equation by hand to get this
+  let dx = (c * f - b * g) / (a * f - b * e);
+  let dy = (c * e - a * g) / (e * b - f * a);
+  return new Vec(dx, dy);
+}
+
 // gets largest gradient magnitude
 function getDi(G, pos, Kij, Lij) {
   let Di = new Map();
@@ -122,7 +176,24 @@ function KamadaKawaLayout(G) {
   let Delta_i = getDi(G, pos, Kij, Lij);
   // get the node with the highest value Di
   let maxm = [...Delta_i.entries()].reduce((a, e) => e[1] > a[1] ? e : a)[0];
-  return maxm;
+  while (Delta_i.get(maxm) > tol) {
+    let ITERCOUNT = 0;
+    while (Delta_i.get(maxm) > tol) {
+      // If we get stuck, kick it around a bit
+      if (ITERCOUNT >= 100) {
+        pos.set(maxm, new Vec(Math.random(), Math.random()));
+        ITERCOUNT = 0;
+      }
+      else {
+        let dv = getDelta(G, maxm, pos, Kij, Lij);
+        pos.set(maxm, pos.get(maxm).plus(dv));
+        ITERCOUNT += 1;
+      }
+    }
+    Delta_i = getDi(G, pos, Kij, Lij);
+    maxm = [...Delta_i.entries()].reduce((a, e) => e[1] > a[1] ? e : a)[0];
+  }
+  return pos;
 }
 
 let G = Graph.getMST(Graph.getGnp(10), 0);

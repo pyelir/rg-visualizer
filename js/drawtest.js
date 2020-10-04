@@ -1,67 +1,72 @@
 import Graph from "./graph.js";
-import Layout from "./layouts.js"
-let G = Graph.getGnp(80);
-let H = Graph.getMST(G, 0);
+import Layout from "./layouts.js";
+import Vec from "./vec.js";
 
-
-
-function getExtrema(positions){
-  // Ugly hack, but initializes extrema to xMin=xMax= first x coordinate and
-  // yMin=yMax=first y coordinate
-  let extrema;
-  for (let k of positions.keys()) {
-    let firstPos = positions.get(k);
-    extrema = new Extrema(firstPos.x, firstPos.y);
-    break;
+export default class Draw {
+  static getExtrema(positions){
+    // Ugly hack, but initializes extrema to xMin=xMax= first x coordinate and
+    // yMin=yMax=first y coordinate
+    let extrema;
+    for (let k of positions.keys()) {
+      let firstPos = positions.get(k);
+      extrema = new Extrema(firstPos.x, firstPos.y);
+      break;
+    }
+    for (let node of positions.keys()) {
+      let newPos = positions.get(node);
+      let newY = newPos.y;
+      let newX = newPos.x;
+      if (newY < extrema.getMinY()) {
+        extrema.setMinY(newY);
+      }
+      if (newY > extrema.getMaxY()) {
+        extrema.setMaxY(newY);
+      }
+      if (newX < extrema.getMinX()) {
+        extrema.setMinX(newX);
+      }
+      if (newX > extrema.getMaxX()) {
+        extrema.setMaxX(newX);
+      }
+    }
+    return extrema;
   }
-  for (let node of positions.keys()) {
-    let newPos = positions.get(node);
-    let newY = newPos.y;
-    let newX = newPos.x;
-    if (newY < extrema.getMinY()) {
-      extrema.setMinY(newY);
-    }
-    if (newY > extrema.getMaxY()) {
-      extrema.setMaxY(newY);
-    }
-    if (newX < extrema.getMinX()) {
-      extrema.setMinX(newX);
-    }
-    if (newX > extrema.getMaxX()) {
-      extrema.setMaxX(newX);
-    }
-  }
-  return extrema;
-}
 
-function draw(G, positions, cvs) {
-  let extrema = getExtrema(positions);
-  let scale = new Coords(extrema, cvs)
-  for (let v = 0; v < G.nodes; v++) {
-    for (let u of G.getNeighbors(v).keys()) {
-      if (v < u) {
-        drawLine(u,v,cvs,positions,scale);
+  static draw(G, positions, cvs) {
+    let extrema = Draw.getExtrema(positions);
+    let scale = new Coords(extrema, cvs)
+    for (let v = 0; v < G.nodes; v++) {
+      for (let u of G.getNeighbors(v).keys()) {
+        if (v < u) {
+          Draw.drawLine(u,v,cvs,positions,scale);
+        }
       }
     }
   }
-}
 
-function drawLine(u, v, cvs, positions, coords) {
-  let cx = cvs.getContext("2d");
-  cx.beginPath();
-  cx.strokeStyle = "grey";
-  cx.lineWidth = 1;
-  let x1 = coords.scale(positions.get(v).x, 0);
-//  let x1 = Math.round(width * positions.get(v).x);
-  let y1 = coords.scale(positions.get(v).y, 1);
-//  let y1 =  Math.round(height * positions.get(v).y);
-  let x2 = coords.scale(positions.get(u).x, 0);
-//  let x2 = Math.round(width * positions.get(u).x);
-  let y2 = coords.scale(positions.get(u).y, 1);
-//  let y2 = Math.round(height * positions.get(u).y);
-  cx.moveTo(x1, y1);
-  cx.lineTo(x2, y2);
-  cx.stroke();
+  static redraw(G, positions, cvs) {
+    const context = cvs.getContext('2d');
+    context.clearRect(0, 0, cvs.width, cvs.height);
+    Draw.draw(G, positions, cvs);
+  }
+
+  static drawLine(u, v, cvs, positions, coords) {
+    let cx = cvs.getContext("2d");
+    cx.beginPath();
+    cx.strokeStyle = "grey";
+    cx.lineWidth = 1;
+    let x1 = coords.scale(positions.get(v).x, 0);
+  //  let x1 = Math.round(width * positions.get(v).x);
+    let y1 = coords.scale(positions.get(v).y, 1);
+  //  let y1 =  Math.round(height * positions.get(v).y);
+    let x2 = coords.scale(positions.get(u).x, 0);
+  //  let x2 = Math.round(width * positions.get(u).x);
+    let y2 = coords.scale(positions.get(u).y, 1);
+  //  let y2 = Math.round(height * positions.get(u).y);
+    cx.moveTo(x1, y1);
+    cx.lineTo(x2, y2);
+    cx.stroke();
+  }
 }
 
 class Extrema {
@@ -142,41 +147,5 @@ class Coords {
   }
 }
 
-// vector in 2D Euclidean space
-export default class Vec {
-  constructor(x, y) {
-    this.x = x;
-    this.y = y;
-  }
 
-  add(other) {
-    return new Vec(this.x + other.x, this.y + other.y);
-  }
-
-  minus(other) {
-    return new Vec(this.x - other.x, this.y - other.y);
-  }
-
-  times(c) {
-    return new Vec(c * this.x, c * this.y );
-  }
-
-  // Bit of a hack :(
-  coord(num) {
-    if (num == 0) {
-      return this.x;
-    }
-    return this.y;
-  }
-
-  get magnitude() {
-    return Math.sqrt(this.x * this.x + this.y * this.y);
-  }
-
-  get unitvec() {
-    let magnitude = Math.sqrt(this.x * this.x + this.y * this.y);
-    return new Vec(this.x/magnitude, this.y/magnitude);
-  }
-}
-
-draw(H, Layout.KamadaKawaiLayout(H), document.querySelector("canvas"));
+// draw(H, Layout.KamadaKawaiLayout(H), document.querySelector("canvas"));

@@ -1,5 +1,5 @@
 import Graph from "./graph.js"
-import Vec from "./drawtest.js"
+import Vec from "./vec.js"
 
 // Get random positions
 

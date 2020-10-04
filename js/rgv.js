@@ -3,11 +3,20 @@
  * Date: Sept. 18, 2020
  */
 
-let slider = document.getElementById("pval");
-let output = document.getElementById("view");
-output.appendChild(document.createTextNode(slider.value));
-slider.addEventListener("input", () => {
-  output.removeChild(output.childNodes[0]);
-  output.appendChild(document.createTextNode(slider.value));
-});
+import Draw from "./drawtest.js";
+import Layout from "./layouts.js";
+import Graph from "./graph.js";
 
+let slider = document.getElementById("pval");
+let output = document.getElementById("pview");
+let G = Graph.getGnp(100);
+let T = Graph.getMST(G, 0);
+let pos = Layout.KamadaKawaiLayout(T);
+Draw.draw(T, pos, document.getElementById("drawsurface"));
+output.appendChild(document.createTextNode(`p = ${slider.value}`));
+slider.addEventListener("input", () => {
+  Draw.redraw(Graph.getPartialGnp(G, slider.value), pos, document.getElementById("drawsurface"))
+  console.log(G);
+  output.removeChild(output.childNodes[0]);
+  output.appendChild(document.createTextNode(`p = ${slider.value}`));
+});

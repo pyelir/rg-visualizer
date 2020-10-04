@@ -32,12 +32,29 @@ export default class Graph {
 
 	static getGnp(n) {
 		let gnp = new Graph(n);
+		let probs = []
 		for (let i = 0; i < n-1; i++) {
 			for (let j = i+1; j < n; j++) {
-				gnp.addEdge(i, j, Math.random());
+				let newprob = Math.random();
+				probs = Graph.updateProbs(i, j, probs, newprob);
+				gnp.addEdge(i, j, newprob);
 			}
 		}
+		gnp.probs = probs;
 		return gnp;
+	}
+
+	static updateProbs(i, j, probs, newprob) {
+		let k = 0;
+		if (probs.length > 0) {
+			while (probs[k][0] < newprob) {
+				k++;
+				if (k >= probs.length) {
+					break;
+				}
+			}
+		}
+		return [...probs.slice(0,k), [newprob, i, j], ...probs.slice(k)];
 	}
 
 	/* Compute the minimum spanning tree of some graph G using Prim's algorithm */
@@ -66,6 +83,21 @@ export default class Graph {
 			}
 		}
 		return Graph.build_MST(G, Pi);
+	}
+
+	static getPartialGnp(gnp, p) {
+		let N = new Graph(gnp.nodes);
+		let i = 0;
+		while (gnp.probs[i][0] <= p) {
+			if (i < gnp.probs.length) {
+				N.addEdge(gnp.probs[i][1], gnp.probs[i][2], gnp.probs[i][0]);
+				i++;
+			} else {
+				break;
+			}
+		}
+		console.log(N);
+		return N;
 	}
 
 	static build_MST(G, Pi) {

@@ -89,7 +89,7 @@ export default class Graph {
 		let N = new Graph(gnp.nodes);
 		let i = 0;
 		while (gnp.probs[i][0] <= p) {
-			if (i < gnp.probs.length) {
+			if (i < gnp.probs.length - 1) {
 				N.addEdge(gnp.probs[i][1], gnp.probs[i][2], gnp.probs[i][0]);
 				i++;
 			} else {

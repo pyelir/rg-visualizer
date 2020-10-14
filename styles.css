@@ -11,12 +11,24 @@ body {
   align-items: center;
 }
 
+.graphview {
+  margin-top: 10px;
+}
+
 .slidecontainer {
+  width: 85vw;
+}
+
+.pview {
+  float: right;
+  font-family: "Lucidia Console", monospace;
 }
 
 .slider {
+  float: left;
+  margin-left: 10px;
   -webkit-appearance: none;
-  width: 100%;
+  width: 90%;
   height: 25px;
   background: #d3d3d3;
   outline: none;

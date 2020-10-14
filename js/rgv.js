@@ -7,6 +7,7 @@ import Draw from "./drawtest.js";
 import Layout from "./layouts.js";
 import Graph from "./graph.js";
 
+
 let slider = document.getElementById("pval");
 let output = document.getElementById("pview");
 let G = Graph.getGnp(40);
@@ -16,10 +17,10 @@ let cvs = document.getElementById("drawsurface");
 cvs.height = window.innerHeight * 0.7;
 cvs.width = window.innerWidth * 0.9;
 Draw.draw(Graph.getPartialGnp(G, slider.value), pos, cvs);
-output.appendChild(document.createTextNode(`p = ${slider.value}`));
+output.appendChild(document.createTextNode(`p = ${Number(slider.value).toFixed(3)}`));
 slider.addEventListener("input", () => {
   Draw.redraw(Graph.getPartialGnp(G, slider.value), pos, document.getElementById("drawsurface"))
   console.log(G);
   output.removeChild(output.childNodes[0]);
-  output.appendChild(document.createTextNode(`p = ${slider.value}`));
+  output.appendChild(document.createTextNode(`p = ${Number(slider.value).toFixed(3)}`));
 });
